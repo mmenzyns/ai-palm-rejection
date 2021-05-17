@@ -121,6 +121,7 @@ int singleCapture(struct hm_cfg *cfg) {
 
 int continuousCapture(struct hm_cfg *cfg) {
     size_t len;
+    bool first_number = true;
 
     const struct timespec ts = {
         .tv_sec = 1 / cfg->rate,
@@ -157,6 +158,14 @@ int continuousCapture(struct hm_cfg *cfg) {
                 if (i % cfg->width == 0)
                     printf("\n");
                 printf("%4d ", blob); // Standardize? the data
+            }
+
+            if (cfg->file) {
+                if (first_number)
+                    first_number = false;
+                else
+                    fprintf(cfg->file, "\t");
+                fprintf(cfg->file, "%d", blob);
             }
         }
         if (cfg->print) {

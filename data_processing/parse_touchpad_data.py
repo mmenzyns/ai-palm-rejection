@@ -11,12 +11,12 @@ class TouchpadData:
     size = None
     min_val = float('inf')
     max_val = float('-inf')
-    data = []
 
     def __init__(self, path=None):
         if not os.path.exists(path):
             raise Exception
-        
+
+        self.data = []
         if os.path.isdir(path):
             for filename in glob(path + '/*'):
                 self.data.extend(self.load_file(filename))
@@ -50,4 +50,3 @@ class TouchpadData:
         self.size = self.height * self.width
         return pd.to_numeric(data, errors='ignore', downcast='integer').reshape((-1, self.height, self.width))
     
-original = TouchpadData('dataset/rotate/original')
