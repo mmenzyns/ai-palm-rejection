@@ -17,5 +17,4 @@ volatile sig_atomic_t interrupt_flag_set = 0;
 
 void sigintHandler();
 
-int continuousCapture(struct hm_cfg *cfg);
-int singleCapture(struct hm_cfg *cfg);
+int capture(struct hm_cfg *cfg);

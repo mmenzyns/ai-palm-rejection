@@ -38,15 +38,7 @@ struct hm_cfg {
   int width;	/* Touchscreen width */
   int height;	/* Touchscreen height */
   uint32_t pixfmt; /* Pixel format */
-  int min;		/* Minimal pressure value */
-  int max;		/* Maximumal pressure value */
-  bool auto_min;
-  bool auto_max;
-  bool values;		/* Display pressure values */
-  bool gray;		/* Use grayscale */
   bool print;
-  bool visual;
-  bool shoot;
   bool single_capture;
   FILE *file;
 };
