@@ -45,20 +45,17 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Set up keyboard interrupt
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = sigintHandler;
     sa.sa_flags = 0;// not SA_RESTART!;
-
     sigaction(SIGINT, &sa, NULL);
 
     snprintf(cfg.path, sizeof(cfg.path), "/dev/v4l-touch%d", devno);
 
     if (hm_v4l_init(&cfg, input) < 0)
         return 1;
-
-    if (cfg.file)
-        fprintf(cfg.file, "width\t%d\theight\t%d\n", cfg.width, cfg.height);
 
     return capture(&cfg);
 }
@@ -85,7 +82,7 @@ int capture(struct hm_cfg *cfg) {
         if (!cfg->single_capture)
             nanosleep(&ts, NULL); // Rate of data capturing
 
-        len = hm_v4l_get_frame(cfg);
+        len = hm_v4l_get_frame(cfg); // Get a new buffer frame
 
         if (len == 0) {
             if (err > 5)
@@ -94,7 +91,7 @@ int capture(struct hm_cfg *cfg) {
             continue;
         }
 
-        for (size_t i = 0; i < len; i++) {
+        for (size_t i = 0; i < len; i++) { // Cycle through the frame
             int blob = hm_v4l_get_value(cfg, i);
             assert(blob <= 255 && blob >= -255);
 
