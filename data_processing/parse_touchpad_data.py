@@ -17,6 +17,7 @@ class TouchpadData:
             raise Exception
 
         self.data = []
+        # Todo, load recursively
         if os.path.isdir(path):
             for filename in glob(path + '/*'):
                 self.data.extend(self.load_file(filename))
