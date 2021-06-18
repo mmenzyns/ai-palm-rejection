@@ -8,10 +8,9 @@ import matplotlib.pyplot as plt
 
 
 # Load Data
-legal = np.array(TouchpadData('touchpad_capture/real_data/legal').data)
-illegal = np.array(TouchpadData('touchpad_capture/real_data/illegal').data)
-nontouch = np.array(TouchpadData('touchpad_capture/real_data/nontouches').data)
-
+legal = np.array(TouchpadData('../touchpad_capture/real_data/legal').data)
+illegal = np.array(TouchpadData('../touchpad_capture/real_data/illegal').data)
+nontouch = np.array(TouchpadData('../touchpad_capture/real_data/nontouches').data)
 
 # Create DataFrames for features
 legal_features = pd.DataFrame({
@@ -41,8 +40,8 @@ illegal_scores = pd.Series(bgm.score_samples(illegal_features))
 legal_scores = legal_scores[legal_scores < -500]
 illegal_scores = illegal_scores[illegal_scores < -500]
 
-# Save the rest as PNG
+# # Save the rest as PNG
 for index in legal_scores.index:
-    plt.imsave('data_processing/out/legal/{}.png'.format(index), legal[index], cmap='gray', vmin=-10, vmax=245)
+    plt.imsave('out/legal/{}.png'.format(index), legal[index], cmap='gray', vmin=-10, vmax=245)
 for index in illegal_scores.index:
-    plt.imsave('data_processing/out/illegal/{}.png'.format(index), illegal[index], cmap='gray', vmin=-10, vmax=245)
+    plt.imsave('out/illegal/{}.png'.format(index), illegal[index], cmap='gray', vmin=-10, vmax=245)
