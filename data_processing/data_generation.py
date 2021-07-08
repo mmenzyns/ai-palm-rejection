@@ -9,20 +9,26 @@ import matplotlib.pyplot as plt
 import os
 import operator
 from tqdm import tqdm
+from pathlib import Path
+from argparse import ArgumentParser
+
 
 def read_grayscale_pngs(path, width=20, height=13):
+    if path is None:
+        return None
+
     # print(len([name for name in os.listdir('{}/.'.format(path)) if os.path.isfile(name)]))
-    num_files = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))]) # Calculate amount of files in directory
+    num_files = len(list(path.glob('*'))) # Calculate amount of files in directory
+    # num_files = len([f for f in path.iterdir() if path.joinpath(f).is_file()]) # Calculate amount of files in directory
 
     ids = np.empty(num_files)
     images = np.empty((num_files, 13, 20))
 
-    for i, image_path in enumerate(glob("{}/*".format(path))):
-        id = int(os.path.splitext(os.path.basename(image_path))[0])
-        ids[i] = int(id) # File ID: the reason for this is that before many images were eliminated and I want to keep their original number and indexes wouldn't work
+    for i, image_path in enumerate(path.glob('*.png')):
+        # id = int(image_path.stem)
+        # ids[i] = int(id) # File ID: the reason for this is that before many images were eliminated and I want to keep their original number and indexes wouldn't work
         images[i] = np.array(imread(image_path))[:, :, 0] # Pixel data: It's grayscale so take only Red values from [R, G, B, A]
-    return ids, images
-
+    return images
 
 def shift_images(image, width=20, height=13):
     # Get indices for cells with a value higher than 25,
@@ -40,7 +46,6 @@ def shift_images(image, width=20, height=13):
 
     y_min = np.min(indices[1])
     y_max = np.max(indices[1])
-
 
     # Create range of movement that will tell which directions can be image 
     #  shifted to generate mroe images 
@@ -69,8 +74,7 @@ def shift_images(image, width=20, height=13):
 
 def weighted_average_indexes(image):
     # Values below 35 are not substantial and they mess with the average so replace them with zero
-    image[image < 35] = 0        print("Generating mirrored illegal data")
-
+    image[image < 35] = 0
     total = np.sum(image) 
 
     if total == 0:
@@ -104,36 +108,63 @@ def rotate_image(image, angle):
     return shifted[0:-shape_diff[0], 0:-shape_diff[1]]
 
 
-import seaborn as sns
+# import seaborn as sns
 if __name__ == '__main__':
+
+    # Define the interface
+    ap = ArgumentParser(description="Read data created by touchpad capture program, and from illegal data, remove data that don't belong there, such as empty images, or some anomalies")
+    ap.add_argument('dest', type=Path, nargs='?', default="out", help="""Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".""")
+    ap.add_argument('--legal', type=Path, metavar="PATH", help="dataset containing finger touches, that the palm ejection algorithm shouldn't reject")
+    ap.add_argument('--illegal', type=Path, metavar="PATH", help="dataset containing palm touched, that the palm rejection algorithm should reject")
+    ap.add_argument('-W', type=int, default=20, metavar="WIDTH", help="width of each image")
+    ap.add_argument('-H', type=int, default=13, metavar="HEIGHT", help="height of each image")
+
+    # args = ap.parse_args()
+    args = ap.parse_args(['--legal', 'out/legal/orig', '--illegal', 'out/illegal/orig'])
+
+    # if len(argv) == 1:
+    #     ap.print_help()
+    #     quit()
     
-    legal = read_grayscale_pngs('cleaned/legal')
-    illegal = read_grayscale_pngs('cleaned/illegal')
+    legal = read_grayscale_pngs(args.legal)
+    illegal = read_grayscale_pngs(args.illegal)
 
-    ids, images = legal
-    pbar = tqdm(total=len(images), desc="Legal data")
-    for i, image in enumerate(images):
+    if legal is not None:
+        pbar = tqdm(total=len(legal), desc="Legal data")
+        for i, image in enumerate(legal):
+            dest = args.dest/'legal'
+            images_shifted = shift_images(image)
+            dest_shifted = dest/'shifted'
+            dest_shifted.mkdir(parents=True, exist_ok=True)
+            for j, img in enumerate(images_shifted):
+                plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
 
-        shifted_images = shift_images(image)
-        for j, shifted_image in enumerate(shifted_images):
-            plt.imsave('shifted/legal/{}_{}.png'.format(ids[i], j), shifted_image, cmap='gray', vmin=-10, vmax=245)
-        
-        pbar.update()
+            mirrored_images = np.flip(legal, axis=2) # Flip (mirror) horizontally
+            dest_mirrored = dest/'mirrored'
+            dest_mirrored.mkdir(parents=True, exist_ok=True)
+            for j, img in enumerate(mirrored_images):
+                plt.imsave('{}/{}_{}.png'.format(dest_mirrored, i, j), img, cmap='gray', vmin=-10, vmax=245)
+            
+            pbar.update()
 
     
-    ids, images = illegal
-    pbar = tqdm(total=len(images), desc="Illegal data")
-    for i, image in enumerate(images):
+    if illegal is not None:
+        pbar = tqdm(total=len(illegal), desc="Illegal data")
+        for i, image in enumerate(illegal):
 
-        shifted_images = shift_images(image)
-        for j, img in enumerate(shifted_images):
-            plt.imsave('shifted/illegal/{}_{}.png'.format(ids[i], j), img, cmap='gray', vmin=-10, vmax=245)
+            images_shifted = shift_images(image)
+            dest_shifted = dest/'shifted'
+            dest_shifted.mkdir(parents=True, exist_ok=True)
+            for j, img in enumerate(images_shifted):
+                plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
 
-        rotated_image = np.fliplr(image)
-        plt.imsave('mirrored/illegal/{}.png'.format(ids[i]), rotated_image, cmap='gray', vmin=-10, vmax=245)
-        
-        mirrored_images = np.flip(images, axis=2) # Flip (mirror) horizontally
-        for j, img in enumerate(mirrored_images):
-            plt.imsave('shifted/illegal/{}_{}.png'.format(ids[i], j), img, cmap='gray', vmin=-10, vmax=245)
-        
-        pbar.update()
+            rotated_image = np.fliplr(image)
+            plt.imsave('{}/{}.png'.format(dest_shifted, i), rotated_image, cmap='gray', vmin=-10, vmax=245)
+            
+            mirrored_images = np.flip(illegal, axis=2) # Flip (mirror) horizontally
+            dest_mirrored = dest/'mirrored'
+            dest_mirrored.mkdir(parents=True, exist_ok=True)
+            for j, img in enumerate(mirrored_images):
+                plt.imsave('{}/{}_{}.png'.format(dest_mirrored, i, j), img, cmap='gray', vmin=-10, vmax=245)
+            
+            pbar.update()

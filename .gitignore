@@ -1,3 +1,10 @@
+**/out/
+**/out_old/
+**/legal/
+**/illegal/
+**/testing/
+
+#
 # Prerequisites
 *.d
 
