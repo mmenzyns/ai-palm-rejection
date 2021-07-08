@@ -76,8 +76,12 @@ int capture(struct hm_cfg *cfg) {
             getchar();
         }
 
-        if (interrupt_flag_set)
+        if (interrupt_flag_set) {
+            if (cfg->print)
+                printf("\n");
+            fprintf(cfg->file, "\n");
             break;
+        }
 
         if (!cfg->single_capture)
             nanosleep(&ts, NULL); // Rate of data capturing

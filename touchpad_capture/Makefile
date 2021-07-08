@@ -9,5 +9,4 @@ proj: $(CFILES) $(HFILES)
 	$(CC) -o $@ $(CFILES) $(CFLAGS)
 
 clean:
-	rm -f $(SRC)*.o $(SRC)*~ $(BUILD)proj
-
+	rm -f $(SRC)*.o $(SRC)*~ proj
