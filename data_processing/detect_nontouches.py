@@ -1,3 +1,5 @@
+#!/usr/bin/env python 
+
 from parse_touchpad_data import TouchpadData
 from sklearn.mixture import BayesianGaussianMixture
 
