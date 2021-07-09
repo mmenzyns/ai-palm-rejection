@@ -46,13 +46,13 @@ ap.add_argument('--nontouch', type=Path, metavar="PATH", help="Remove data from 
 ap.add_argument('-W', type=int, default=20, metavar="WIDTH", help="width of each image")
 ap.add_argument('-H', type=int, default=13, metavar="HEIGHT", help="height of each image")
 
-# args = ap.parse_args(['--legal','../touchpad_capture/real_data/legal'])
-args = ap.parse_args()
+args = ap.parse_args(['--illegal','../touchpad_capture/real_data/illegal', '--nontouch', '../touchpad_capture/real_data/nontouches'])
+# args = ap.parse_args()
 
 # Comment out if using manual input
-if len(argv) == 1:
-    ap.print_help()
-    quit()
+# if len(argv) == 1:
+#     ap.print_help()
+#     quit()
 
 # Check user input
 if args.legal is None and args.illegal is None:
@@ -94,7 +94,7 @@ if illegal is not None:
     else:
         base_index = 0
 
-    if nontouch.any():
+    if nontouch is not None:
         # Use feature learning to remove unfit data
         illegal_features = pd.DataFrame({
             'vars': np.var(illegal, axis=(1,2)), 

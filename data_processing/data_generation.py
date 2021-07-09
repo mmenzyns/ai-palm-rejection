@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from numpy.core.defchararray import capitalize
 from numpy.lib.function_base import median
 from scipy import ndimage
 from glob import glob
@@ -14,12 +15,17 @@ from argparse import ArgumentParser
 
 
 def read_grayscale_pngs(path, width=20, height=13):
-    if path is None:
+    if path is None or not path.exists():
+        print("Path {} doesn't exist".format(path))
         return None
 
     # print(len([name for name in os.listdir('{}/.'.format(path)) if os.path.isfile(name)]))
-    num_files = len(list(path.glob('*'))) # Calculate amount of files in directory
+    num_files = len(list(path.glob('*.png'))) # Calculate amount of files in directory
     # num_files = len([f for f in path.iterdir() if path.joinpath(f).is_file()]) # Calculate amount of files in directory
+
+    if num_files == 0:
+        print("Path {} doesn't contain any images".format(path))
+        return None
 
     ids = np.empty(num_files)
     images = np.empty((num_files, 13, 20))
@@ -115,12 +121,14 @@ if __name__ == '__main__':
     ap = ArgumentParser(description="Read data created by touchpad capture program, and from illegal data, remove data that don't belong there, such as empty images, or some anomalies")
     ap.add_argument('dest', type=Path, nargs='?', default="out", help="""Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".""")
     ap.add_argument('--legal', type=Path, metavar="PATH", help="dataset containing finger touches, that the palm ejection algorithm shouldn't reject")
-    ap.add_argument('--illegal', type=Path, metavar="PATH", help="dataset containing palm touched, that the palm rejection algorithm should reject")
-    ap.add_argument('-W', type=int, default=20, metavar="WIDTH", help="width of each image")
-    ap.add_argument('-H', type=int, default=13, metavar="HEIGHT", help="height of each image")
+    ap.add_argument('--illegal', type=Path, metavar="PATH", help="dataset containing palm touches, that the palm rejection algorithm should reject")
+    ap.add_argument('-s', action='store_false', help="don't use shiftin for generation", dest='shift')
+    ap.add_argument('-m', action='store_false', help="don't use mirroring for generation", dest='mirror')
+    ap.add_argument('-r', action='store_false', help="don't use rotating for generation", dest='rotate')
 
-    # args = ap.parse_args()
-    args = ap.parse_args(['--legal', 'out/legal/orig', '--illegal', 'out/illegal/orig'])
+
+    args = ap.parse_args()
+    # args = ap.parse_args(['--legal', 'out/legal/orig'])
 
     # if len(argv) == 1:
     #     ap.print_help()
@@ -129,42 +137,32 @@ if __name__ == '__main__':
     legal = read_grayscale_pngs(args.legal)
     illegal = read_grayscale_pngs(args.illegal)
 
-    if legal is not None:
-        pbar = tqdm(total=len(legal), desc="Legal data")
-        for i, image in enumerate(legal):
-            dest = args.dest/'legal'
-            images_shifted = shift_images(image)
-            dest_shifted = dest/'shifted'
-            dest_shifted.mkdir(parents=True, exist_ok=True)
-            for j, img in enumerate(images_shifted):
-                plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
+    for key, images in {'legal': legal, 'illegal': illegal}.items():
+        if images is not None:
+            pbar = tqdm(total=len(images), desc=key)
+            dest = args.dest/key
 
-            mirrored_images = np.flip(legal, axis=2) # Flip (mirror) horizontally
-            dest_mirrored = dest/'mirrored'
-            dest_mirrored.mkdir(parents=True, exist_ok=True)
-            for j, img in enumerate(mirrored_images):
-                plt.imsave('{}/{}_{}.png'.format(dest_mirrored, i, j), img, cmap='gray', vmin=-10, vmax=245)
+            if args.shift:
+                dest_shifted = dest/'shifted'
+                dest_shifted.mkdir(parents=True, exist_ok=True)
+
+            if args.mirror:
+                dest_mirrored = dest/'mirrored'
+                dest_mirrored.mkdir(parents=True, exist_ok=True)
+
+            if args.shift and args.mirror:
+                dest_shift_mirrored = dest/'shift_mirrored'
+                dest_shift_mirrored.mkdir(parents=True, exist_ok=True)
             
-            pbar.update()
+            for i, image in enumerate(images):
 
-    
-    if illegal is not None:
-        pbar = tqdm(total=len(illegal), desc="Illegal data")
-        for i, image in enumerate(illegal):
+                if args.shift:
+                    images_shifted = shift_images(image) 
+                    for j, img in enumerate(images_shifted):
+                        plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
+                        if args.mirror:
+                            plt.imsave('{}/{}_{}.png'.format(dest_shift_mirrored, i, j), np.fliplr(img), cmap='gray', vmin=-10, vmax=245)
+                if args.mirror:
+                    plt.imsave('{}/{}.png'.format(dest_mirrored, i), np.fliplr(image), cmap='gray', vmin=-10, vmax=245)
 
-            images_shifted = shift_images(image)
-            dest_shifted = dest/'shifted'
-            dest_shifted.mkdir(parents=True, exist_ok=True)
-            for j, img in enumerate(images_shifted):
-                plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
-
-            rotated_image = np.fliplr(image)
-            plt.imsave('{}/{}.png'.format(dest_shifted, i), rotated_image, cmap='gray', vmin=-10, vmax=245)
-            
-            mirrored_images = np.flip(illegal, axis=2) # Flip (mirror) horizontally
-            dest_mirrored = dest/'mirrored'
-            dest_mirrored.mkdir(parents=True, exist_ok=True)
-            for j, img in enumerate(mirrored_images):
-                plt.imsave('{}/{}_{}.png'.format(dest_mirrored, i, j), img, cmap='gray', vmin=-10, vmax=245)
-            
-            pbar.update()
+                pbar.update()
