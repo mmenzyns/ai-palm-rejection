@@ -27,10 +27,9 @@ def read_grayscale_pngs(path, width=20, height=13):
         print("Path {} doesn't contain any images".format(path))
         return None
 
-    ids = np.empty(num_files)
     images = np.empty((num_files, 13, 20))
 
-    for i, image_path in enumerate(path.glob('*.png')):
+    for i, image_path in enumerate(sorted(path.glob('*.png'), key=lambda f: int(f.stem))):
         # id = int(image_path.stem)
         # ids[i] = int(id) # File ID: the reason for this is that before many images were eliminated and I want to keep their original number and indexes wouldn't work
         images[i] = np.array(imread(image_path))[:, :, 0] # Pixel data: It's grayscale so take only Red values from [R, G, B, A]
@@ -122,7 +121,7 @@ if __name__ == '__main__':
     ap.add_argument('dest', type=Path, nargs='?', default="out", help="""Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".""")
     ap.add_argument('--legal', type=Path, metavar="PATH", help="dataset containing finger touches, that the palm ejection algorithm shouldn't reject")
     ap.add_argument('--illegal', type=Path, metavar="PATH", help="dataset containing palm touches, that the palm rejection algorithm should reject")
-    ap.add_argument('-s', action='store_false', help="don't use shiftin for generation", dest='shift')
+    ap.add_argument('-s', action='store_false', help="don't use shifting for generation", dest='shift')
     ap.add_argument('-m', action='store_false', help="don't use mirroring for generation", dest='mirror')
     ap.add_argument('-r', action='store_false', help="don't use rotating for generation", dest='rotate')
 
