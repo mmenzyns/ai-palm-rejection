@@ -1,0 +1,95 @@
+12 0.98 72.5% 4 kernels 1 relus
+12 0.81 89.7% 4 kernels 1 relus
+12 0.59 91.0% 4 kernels 1 relus
+12 0.86 90.2% 4 kernels 1 relus
+12 0.67 61.6% 4 kernels 1 relus
+
+12 0.97 72.3% 4 kernels 2 relus
+12 0.64 89.9% 4 kernels 2 relus
+12 0.52 93.2% 4 kernels 2 relus
+12 0.50 83.7% 4 kernels 2 relus
+12 0.46 92.2% 4 kernels 2 relus
+
+12 0.89 85.3% 4 kernels 3 relus
+12 0.68 90.9% 4 kernels 3 relus
+12 0.81 90.6% 4 kernels 3 relus
+12 0.75 88.8% 4 kernels 3 relus
+12 0.90 87.3% 4 kernels 3 relus
+
+12 0.81 87.3% 4 kernels 4 relus
+12 0.89 87.8% 4 kernels 4 relus
+12 1.07 86.0% 4 kernels 4 relus
+12 0.73 88.1% 4 kernels 4 relus
+12 0.5 90.4% 4 kernels 4 relus
+
+12 0.8 87.9% 4 kernels 5 relus
+12 0.86 83.7% 4 kernels 5 relus
+12 0.64 88.6% 4 kernels 5 relus
+12 0.33 88.8% 4 kernels 5 relus
+12 1.49 86.5% 4 kernels 5 relus
+
+12 0.7 89.6% 4 kernels 6 relus
+12 0.86 87.3% 4 kernels 6 relus
+12 0.99 85.8% 4 kernels 6 relus
+12 0.82 89.4% 4 kernels 6 relus
+12 0.72 88.3% 4 kernels 6 relus
+
+12 0.82 88.3% 4 kernels 7 relus
+12 0.84 87.8% 4 kernels 7 relus
+12 1.08 86.8% 4 kernels 7 relus
+12 0.54 90.7% 4 kernels 7 relus
+12 1.02 88.1% 4 kernels 7 relus
+
+12 0.97 86.3% 4 kernels 8 relus
+12 0.81 88.6% 4 kernels 8 relus
+12 0.69 89.9% 4 kernels 8 relus
+12 0.89 88.3% 4 kernels 8 relus
+12 0.78 87.3% 4 kernels 8 relus
+
+64 1.04 86.5% None relu
+64 1.11 85.8% None relu
+64 1.02 86.8% None relu
+64 1.1 86.2% None relu
+64 1.25 84.7% None relu
+
+48 1.16 84.5% None relu
+48 1.02 86.6% None relu
+48 1.04 86.2% None relu
+48 1.02 85.5% None relu
+48 1.16 84.2% None relu
+
+40 1.21 83.9% None relu
+40 1.11 85.0% None relu
+40 1.01 84.4% None relu
+40 1.15 82.7% None relu
+40 1.18 84.2% None relu
+
+56 1.23 85.3% None relu
+56 0.92 87.3% None relu
+56 1.07 86.3% None relu
+56 1.06 84.9% None relu
+56 1.2 84.5% None relu
+
+96 1.21 85.5% None relu
+96 1.1 86.6% None relu
+96 1.24 86.2% None relu
+96 1.36 83.2% None relu
+96 1.04 86.5% None relu
+
+80 1.02 87.3% None relu
+80 1.24 84.9% None relu
+80 1.14 85.8% None relu
+80 1.42 84.0% None relu
+80 1.1 86.6% None relu
+
+68 1.24 84.4% None relu
+68 1.26 83.7% None relu
+68 1.28 85.5% None relu
+68 1.0 86.8% None relu
+68 1.21 86.5% None relu
+
+65 1.24 85.5% None relu
+65 1.2 84.7% None relu
+65 1.19 85.3% None relu
+65 1.12 85.5% None relu
+65 1.05 86.5% None relu
