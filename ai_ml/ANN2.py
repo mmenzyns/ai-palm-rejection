@@ -42,21 +42,15 @@ X_test = X_test / 255.0
 Y_test = np.concatenate((np.full(len(legal_test), 0), np.full(len(illegal_test), 1)))
 
 
-
-
-conv_filters = 14
-kernel_size = 4
-relus = 6
-dropout = 0.31
+relus = 200
+dropout = 0.05
 
 # Reccurent
 keras.backend.clear_session()
 modelc = keras.Sequential()
 
-modelc.add(layers.Reshape((13,20,1), input_shape=(13,20)))
-modelc.add(layers.Conv2D(conv_filters, kernel_size, input_shape=(13,20,1), activation="relu"))
+modelc.add(layers.Flatten(input_shape=(13,20)))
 modelc.add(layers.Dropout(dropout))
-modelc.add(layers.Flatten())
 modelc.add(layers.Dense(relus,  activation="relu"))
 modelc.add(layers.Dense(1,  activation="sigmoid"))
 
@@ -66,7 +60,7 @@ modelc.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=False)
 
 loss, accuracy = modelc.evaluate(X_test, Y_test, verbose=0)
 
-f = open("logs/cnn-dropouts", 'a')
-f.write("{} {} {}% {} kernels {} relus dropout {}\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))
+f = open("logs/ann-dropouts", 'a')
+f.write("{} {}% {} relus dropout {}\n".format(round(loss, 2), round(accuracy*100, 1), relus, dropout))
 f.close()
-print("{} {} {}% {} kernels {} relus {} dropout\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))
+print("{} {}% {} relus {} dropout\n".format(round(loss, 2), round(accuracy*100, 1), relus, dropout))

@@ -41,22 +41,6 @@ Y_train = np.concatenate((np.full(len(legal), 0), np.full(len(illegal), 1)))
 X_test = np.concatenate((legal_test, illegal_test))
 Y_test = np.concatenate((np.full(len(legal_test), 0), np.full(len(illegal_test), 1)))
 
-
-# model = keras.Sequential()
-# model.add(layers.Flatten(input_shape=(13,20)))
-# model.add(layers.Dense(1, activation="relu"))
-# # model.add(layers.Dense(2, activation="relu"))
-# model.add(layers.Dense(1, activation="sigmoid"))
-
-# model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-
-# model.fit(X_train, Y_train, shuffle=True, epochs=10)
-
-# loss, accuracy = model.evaluate(X_test, Y_test, verbose=0)
-# print("loss: {}, accuracy: {}%".format(round(loss, 2), round(accuracy*100, 2)))
-
-
-
 layer_sizes = []
 accuracies = []
 

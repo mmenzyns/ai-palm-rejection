@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from numpy.core.defchararray import capitalize
-from numpy.lib.function_base import median
 from scipy import ndimage
-from glob import glob
 from imageio import imread
 import matplotlib.pyplot as plt
-import os
+from sys import argv
 import operator
 from tqdm import tqdm
 from pathlib import Path
@@ -15,7 +12,9 @@ from argparse import ArgumentParser
 
 
 def read_grayscale_pngs(path, width=20, height=13):
-    if path is None or not path.exists():
+    if path is None:
+        return None
+    if not path.exiksts():
         print("Path {} doesn't exist".format(path))
         return None
 
@@ -129,9 +128,9 @@ if __name__ == '__main__':
     args = ap.parse_args()
     # args = ap.parse_args(['--legal', 'out/legal/orig'])
 
-    # if len(argv) == 1:
-    #     ap.print_help()
-    #     quit()
+    if len(argv) == 1:
+        ap.print_help()
+        quit()
     
     legal = read_grayscale_pngs(args.legal)
     illegal = read_grayscale_pngs(args.illegal)
