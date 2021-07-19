@@ -41,6 +41,7 @@ struct hm_cfg {
   bool print;
   bool single_capture;
   FILE *file;
+  struct timespec ts;
 };
 
 /* debug_v4l */
