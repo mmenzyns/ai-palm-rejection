@@ -6,22 +6,20 @@ from imageio import imread
 import matplotlib.pyplot as plt
 from sys import argv
 import operator
+from scipy.ndimage.interpolation import rotate
 from tqdm import tqdm
-from pathlib import Path
-from argparse import ArgumentParser
+from pathlib import Path, PosixPath
+from argparse import ArgumentParser, Namespace
 
 
 def read_grayscale_pngs(path, width=20, height=13):
     if path is None:
         return None
-    if not path.exiksts():
+    if not path.exists():
         print("Path {} doesn't exist".format(path))
         return None
 
-    # print(len([name for name in os.listdir('{}/.'.format(path)) if os.path.isfile(name)]))
     num_files = len(list(path.glob('*.png'))) # Calculate amount of files in directory
-    # num_files = len([f for f in path.iterdir() if path.joinpath(f).is_file()]) # Calculate amount of files in directory
-
     if num_files == 0:
         print("Path {} doesn't contain any images".format(path))
         return None
@@ -29,9 +27,8 @@ def read_grayscale_pngs(path, width=20, height=13):
     images = np.empty((num_files, 13, 20))
 
     for i, image_path in enumerate(sorted(path.glob('*.png'), key=lambda f: int(f.stem))):
-        # id = int(image_path.stem)
-        # ids[i] = int(id) # File ID: the reason for this is that before many images were eliminated and I want to keep their original number and indexes wouldn't work
         images[i] = np.array(imread(image_path))[:, :, 0] # Pixel data: It's grayscale so take only Red values from [R, G, B, A]
+
     return images
 
 def shift_images(image, width=20, height=13):
@@ -81,7 +78,7 @@ def weighted_average_indexes(image):
     image[image < 35] = 0
     total = np.sum(image) 
 
-    if total == 0:
+    if np.all(total == 0):
         return None
 
     val = 0
@@ -100,16 +97,22 @@ def weighted_average_indexes(image):
 def rotate_image(image, angle):
     rotated = ndimage.rotate(image, angle, mode='nearest')
 
+    orig_average = weighted_average_indexes(image)
+
+    rotated_average = weighted_average_indexes(rotated)
+    if orig_average is None or rotated_average is None:
+        return None
+
     # Shift the image so the center is at the same place
-    center_diff = tuple(map(operator.sub, weighted_average_indexes(image), weighted_average_indexes(rotated)))
+    center_diff = tuple(map(operator.sub, orig_average, rotated_average))
     median_value = np.median(rotated)
 
     shifted = ndimage.shift(rotated, np.array([center_diff[1], center_diff[0]]), cval=median_value)
 
     shape_diff = tuple(map(operator.sub, rotated.shape, image.shape))
 
-    # Crop the image since it got bigger by rotation
-    return shifted[0:-shape_diff[0], 0:-shape_diff[1]]
+    # Crop the image since it got bigger by rotation, it's centered so cutting the rest is enough
+    return shifted[: image.shape[0], : image.shape[1]]
 
 
 # import seaborn as sns
@@ -120,47 +123,82 @@ if __name__ == '__main__':
     ap.add_argument('dest', type=Path, nargs='?', default="out", help="""Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".""")
     ap.add_argument('--legal', type=Path, metavar="PATH", help="dataset containing finger touches, that the palm ejection algorithm shouldn't reject")
     ap.add_argument('--illegal', type=Path, metavar="PATH", help="dataset containing palm touches, that the palm rejection algorithm should reject")
-    ap.add_argument('-s', action='store_false', help="don't use shifting for generation", dest='shift')
-    ap.add_argument('-m', action='store_false', help="don't use mirroring for generation", dest='mirror')
-    ap.add_argument('-r', action='store_false', help="don't use rotating for generation", dest='rotate')
-
+    ap.add_argument('-r', metavar="DEGREES", nargs='+', type=float, help="don't use rotating for generation", dest='rotate')
+    ap.add_argument('-s', action='store_true', help="Use shifting for generation", dest='shift')
+    ap.add_argument('-m', action='store_true', help="Use mirroring for generation", dest='mirror')
 
     args = ap.parse_args()
-    # args = ap.parse_args(['--legal', 'out/legal/orig'])
+    # args = Namespace(dest=PosixPath('out'), illegal=PosixPath('out/illegal/orig'), 
+    #         legal=PosixPath('out/legal/orig'), mirror=False, rotate=[-1.0, 1.0], shift=False)
+    print(args)
 
-    if len(argv) == 1:
-        ap.print_help()
-        quit()
-    
+    # if len(argv) == 1:
+    #     ap.print_help()
+    #     quit()
+
+    if not args.rotate and not args.shift and not args.mirror:
+        print("No generation option provided. Choose all of them, rotation with -1 and 1 degrees? [y/N]")
+        valid = {'yes': True, 'y': True, 'no': False, 'n': False}
+        while True:
+            choice = input().lower()
+            if choice == "" or not valid[choice]:
+                quit()
+            if valid[choice]:
+                args.rotate = [-1.0, 1.0]
+                args.shift = Truez
+                args.mirror = True
+                break
+
+    if args.rotate:
+        if 0.0 in args.rotate:
+            args.rotate.remove(0.0)
+        for angle in args.rotate:
+            if not(angle > -360 and angle < 360):
+                print("Rotate angle {} outside the range".format(angle))
+                quit()
+
     legal = read_grayscale_pngs(args.legal)
     illegal = read_grayscale_pngs(args.illegal)
 
     for key, images in {'legal': legal, 'illegal': illegal}.items():
-        if images is not None:
-            pbar = tqdm(total=len(images), desc=key)
-            dest = args.dest/key
+        if images is None:
+            continue
 
+        pbar = tqdm(total=len(images), desc=key)
+        dest = args.dest/key
+
+        if args.shift:
+            dest_shifted = dest/'shifted'
+            dest_shifted.mkdir(parents=True, exist_ok=True)
+
+        if args.mirror:
+            dest_mirrored = dest/'mirrored'
+            dest_mirrored.mkdir(parents=True, exist_ok=True)
+
+        if args.shift and args.mirror:
+            dest_shift_mirrored = dest/'shift_mirrored'
+            dest_shift_mirrored.mkdir(parents=True, exist_ok=True)
+
+        if args.rotate:
+            dest_rotated = []
+            for angle in args.rotate:
+                temp_dest = dest/'rotated{}'.format(angle)
+                temp_dest.mkdir(parents=True, exist_ok=True)
+                dest_rotated.append(temp_dest)
+        
+        for i, image in enumerate(images):
             if args.shift:
-                dest_shifted = dest/'shifted'
-                dest_shifted.mkdir(parents=True, exist_ok=True)
-
+                images_shifted = shift_images(image) 
+                for j, img in enumerate(images_shifted):
+                    plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
+                    if args.mirror:
+                        plt.imsave('{}/{}_{}.png'.format(dest_shift_mirrored, i, j), np.fliplr(img), cmap='gray', vmin=-10, vmax=245)
             if args.mirror:
-                dest_mirrored = dest/'mirrored'
-                dest_mirrored.mkdir(parents=True, exist_ok=True)
+                plt.imsave('{}/{}.png'.format(dest_mirrored, i), np.fliplr(image), cmap='gray', vmin=-10, vmax=245)
+            if args.rotate:
+                for angle, temp_dest in zip(args.rotate, dest_rotated):
+                    rotated_image = rotate_image(image, angle)
+                    if rotated_image is not None:
+                        plt.imsave('{}/{}.png'.format(temp_dest, i), rotated_image, cmap='gray', vmin=-10, vmax=245)
 
-            if args.shift and args.mirror:
-                dest_shift_mirrored = dest/'shift_mirrored'
-                dest_shift_mirrored.mkdir(parents=True, exist_ok=True)
-            
-            for i, image in enumerate(images):
-
-                if args.shift:
-                    images_shifted = shift_images(image) 
-                    for j, img in enumerate(images_shifted):
-                        plt.imsave('{}/{}_{}.png'.format(dest_shifted, i, j), img, cmap='gray', vmin=-10, vmax=245)
-                        if args.mirror:
-                            plt.imsave('{}/{}_{}.png'.format(dest_shift_mirrored, i, j), np.fliplr(img), cmap='gray', vmin=-10, vmax=245)
-                if args.mirror:
-                    plt.imsave('{}/{}.png'.format(dest_mirrored, i), np.fliplr(image), cmap='gray', vmin=-10, vmax=245)
-
-                pbar.update()
+            pbar.update()
