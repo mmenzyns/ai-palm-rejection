@@ -7,6 +7,7 @@ from tensorflow.keras import layers
 
 from pathlib import Path
 from imageio import imread
+from tensorflow.python.keras.engine.input_layer import Input
 
 
 def read_grayscale_pngs(path, width=20, height=13):
@@ -51,22 +52,27 @@ dropout = 0.31
 
 # Reccurent
 keras.backend.clear_session()
-modelc = keras.Sequential()
+model = keras.Sequential()
 
-modelc.add(layers.Reshape((13,20,1), input_shape=(13,20)))
-modelc.add(layers.Conv2D(conv_filters, kernel_size, input_shape=(13,20,1), activation="relu"))
-modelc.add(layers.Dropout(dropout))
-modelc.add(layers.Flatten())
-modelc.add(layers.Dense(relus,  activation="relu"))
-modelc.add(layers.Dense(1,  activation="sigmoid"))
+model.add(layers.InputLayer((13,20), name="input"))
+model.add(layers.Reshape((13,20,1), input_shape=(13,20)))
+model.add(layers.Conv2D(conv_filters, kernel_size, input_shape=(13,20,1), activation="relu"))
+model.add(layers.Dropout(dropout))
+model.add(layers.Flatten())
+model.add(layers.Dense(relus,  activation="relu"))
 
-modelc.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-modelc.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=False)
+model.add(layers.Dense(1,  activation="sigmoid", name="output"))
+
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+dot_img_file = 'tmp/CNN.pdf'
+keras.utils.plot_model(model, to_file=dot_img_file, rankdir="LR")
+
+# model.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=False)
 
 
-loss, accuracy = modelc.evaluate(X_test, Y_test, verbose=0)
+# loss, accuracy = model.evaluate(X_test, Y_test, verbose=0)
 
-f = open("logs/cnn-dropouts", 'a')
-f.write("{} {} {}% {} kernels {} relus dropout {}\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))
-f.close()
-print("{} {} {}% {} kernels {} relus {} dropout\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))
+# f = open("logs/cnn-dropouts", 'a')
+# f.write("{} {} {}% {} kernels {} relus dropout {}\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))
+# f.close()
+# print("{} {} {}% {} kernels {} relus {} dropout\n".format(conv_filters, round(loss, 2), round(accuracy*100, 1), kernel_size, relus, dropout))

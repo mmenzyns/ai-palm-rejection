@@ -29,8 +29,8 @@ def read_grayscale_pngs(path, width=20, height=13):
 legal = np.concatenate((read_grayscale_pngs("out/legal/orig"), read_grayscale_pngs("out/legal/mirrored")))
 illegal = np.concatenate((read_grayscale_pngs("out/illegal/orig"), read_grayscale_pngs("out/illegal/mirrored")))
 
-legal_test = read_grayscale_pngs("testing_recurrent/legal")
-illegal_test = read_grayscale_pngs("testing_recurrent/illegal")
+legal_test = read_grayscale_pngs("testing/legal")
+illegal_test = read_grayscale_pngs("testing/illegal")
 
 
 X_train = np.concatenate((legal, illegal))
@@ -43,22 +43,26 @@ Y_test = np.concatenate((np.full(len(legal_test), 0), np.full(len(illegal_test),
 
 
 relus = 200
-dropout = 0.7
+dropout = 0.6
 
 # Reccurent
 keras.backend.clear_session()
-modelc = keras.Sequential()
+model = keras.Sequential()
 
-modelc.add(layers.Flatten(input_shape=(13,20)))
-modelc.add(layers.Dropout(dropout))
-modelc.add(layers.Dense(relus,  activation="relu"))
-modelc.add(layers.Dense(1,  activation="sigmoid"))
+model.add(layers.InputLayer((13,20), name="input"))
+model.add(layers.Flatten(input_shape=(13,20)))
+model.add(layers.Dropout(dropout))
+model.add(layers.Dense(relus,  activation="relu"))
+model.add(layers.Dense(1,  activation="sigmoid", name="output"))
 
-modelc.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-modelc.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=False)
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+# dot_img_file = 'tmp/ANN.pdf'
+# keras.utils.plot_model(model, to_file=dot_img_file, rankdir="LR")
+model.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=False)
 
 
-loss, accuracy = modelc.evaluate(X_test, Y_test, verbose=0)
+loss, accuracy = model.evaluate(X_test, Y_test, verbose=0)
 
 f = open("logs/ann-dropouts", 'a')
 f.write("{} {}% {} relus dropout {}\n".format(round(loss, 2), round(accuracy*100, 1), relus, dropout))

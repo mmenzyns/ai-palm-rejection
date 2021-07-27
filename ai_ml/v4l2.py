@@ -40,9 +40,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Python bindings for the v4l2 userspace api in Linux 2.6.34
-"""
+# Python bindings for the v4l2 userspace api in Linux 2.6.34
+
+#     Title: python3-v4l2
+#     Author: Tomasz Gorochowik, Gregorz Latosinski
+#     Date: Jul 29, 2019
+#     Code version: eefd091c1e56b176beed31e7f7bc7c07cc8cc446
+#     Availability: https://github.com/antmicro/python3-v4l2
 
 # see linux/videodev2.h
 

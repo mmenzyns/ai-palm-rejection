@@ -30,8 +30,8 @@ def read_grayscale_pngs(path, width=20, height=13):
 legal = np.concatenate((read_grayscale_pngs("out/legal/orig"), read_grayscale_pngs("out/legal/mirrored")))
 illegal = np.concatenate((read_grayscale_pngs("out/illegal/orig"), read_grayscale_pngs("out/illegal/mirrored")))
 
-legal_test = read_grayscale_pngs("testing_recurrent/legal")
-illegal_test = read_grayscale_pngs("testing_recurrent/illegal")
+legal_test = read_grayscale_pngs("testing/legal")
+illegal_test = read_grayscale_pngs("testing/illegal")
 
 
 X_train = np.concatenate((legal, illegal))
@@ -43,22 +43,25 @@ X_test = X_test / 255.0
 Y_test = np.concatenate((np.full(len(legal_test), 0), np.full(len(illegal_test), 1)))
 
 
-rnn_cells = 156
+rnn_cells = 51
 relu_neurons = 10
 # Reccurent
 keras.backend.clear_session()
-modelr = keras.Sequential()
+model = keras.Sequential()
 
-modelr.add(layers.Reshape((1,260), input_shape=(13,20)))
-# modelr.add(layers.Flatten())
-modelr.add(layers.LSTM(rnn_cells))
-# modelr.add(layers.Dense(relu_neurons, activation="relu"))
-modelr.add(layers.Dense(1,  activation="sigmoid"))
+model.add(layers.InputLayer((13,20), name="input"))
+model.add(layers.Reshape((1,260), input_shape=(13,20)))
+model.add(layers.LSTM(rnn_cells))
+model.add(layers.Dense(relu_neurons, activation="relu"))
+model.add(layers.Dense(1,  activation="sigmoid", name="output"))
 
-modelr.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-modelr.fit(X_train, Y_train, batch_size=10, epochs=10)
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-loss, accuracy = modelr.evaluate(X_test, Y_test, verbose=0)
+dot_img_file = 'tmp/RNN.pdf'
+keras.utils.plot_model(model, to_file=dot_img_file, rankdir="LR")
+model.fit(X_train, Y_train, batch_size=10, epochs=10, verbose=0)
+
+loss, accuracy = model.evaluate(X_test, Y_test, verbose=0)
 
 f = open("logs/rnn-lstm-cells", 'a')
 f.write("{} {} {}% {} relu\n".format(rnn_cells, round(loss, 2), round(accuracy*100, 1), relu_neurons))
