@@ -18,9 +18,7 @@ from pathlib import Path
 from imageio import imread
 import pandas as pd
 
-from sklearn.svm import SVC
 import marginal
-
 import joblib
 
 

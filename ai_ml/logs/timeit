@@ -1,0 +1,30 @@
+
+ANN
+17.2 s ± 0.703 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
+39.4 ms ± 0.667 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+
+CNN
+46.7 s ± 2.45 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
+51.1 ms ± 1.7 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+
+RNN
+31.8 s ± 2.13 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
+50.3 ms ± 1.47 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+Logistic Regression
+47.8 ms ± 2.76 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+1.23 ms ± 82.5 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+
+SVM
+98.8 ms ± 1.92 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+12 ms ± 499 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+
+Random Forests
+644 ms ± 38.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+11.2 ms ± 178 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+
+training in s
+20.5, 109, 60, 0.211, 0.454, 0.587
+
+prediction in ms
+47.3, 104, 276, 7.6, 41.8, 11.6

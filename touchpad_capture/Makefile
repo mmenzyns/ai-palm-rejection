@@ -1,12 +1,21 @@
 CC=gcc
 CFLAGS=-Wall -g
-HFILES = src/debug_v4l.h src/main.h
-CFILES = src/main.c src/debug_v4l.c
 SRC = src/
 BUILD = build/
 
-proj: $(CFILES) $(HFILES)
-	$(CC) -o $@ $(CFILES) $(CFLAGS)
+_HFILES = main.h debug_v4l.h
+_CFILES = main.c debug_v4l.c
+_OBJ = main.o debug_v4l.o
+
+OBJ = $(patsubst %,$(BUILD)%,$(_OBJ))
+CFILES = $(patsubst %,$(SRC)%,$(_CFILES))
+HFILES = $(patsubst %,$(SRC)%,$(_HFILES))
+
+$(BUILD)%.o: $(SRC)%.c $(HFILES)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+capture: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(SRC)*.o $(SRC)*~ proj
+	rm -f $(BUILD)*.o src/*~ capture

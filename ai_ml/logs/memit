@@ -1,0 +1,23 @@
+ANN - 100 neurons
+peak memory: 541.12 MiB, increment: 52.89 MiB
+peak memory: 550.47 MiB, increment: 0.14 MiB
+
+CNN - 50 neurons, 14 filters, 4x4 kernel
+peak memory: 625.29 MiB, increment: 74.55 MiB
+peak memory: 623.40 MiB, increment: 2.41 MiB
+
+RNN - 50 neurons, 50 LSTM cells
+peak memory: 676.19 MiB, increment: 35.80 MiB
+peak memory: 641.79 MiB, increment: 0.08 MiB
+
+Logistic regression
+peak memory: 591.08 MiB, increment: 0.01 MiB
+peak memory: 591.10 MiB, increment: 0.02 MiB
+
+SVM Clasifier
+peak memory: 600.16 MiB, increment: 0.18 MiB
+peak memory: 600.16 MiB, increment: 0.00 MiB
+
+Random Forests
+peak memory: 600.40 MiB, increment: 0.23 MiB
+peak memory: 600.40 MiB, increment: 0.00 MiB

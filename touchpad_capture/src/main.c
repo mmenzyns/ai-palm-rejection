@@ -4,6 +4,18 @@ void sigintHandler() {
     interrupt_flag_set = 1;
 }
 
+void printhelp(char *program_name) {
+printf("%s [-f PATH, -s, -r, -p, -h]\n", program_name);
+char *str = "\t -p \t\t Print captured values into stdout \n"
+            "\t -s \t\t Use single capture mode instead of a continuous one.\n"
+            "\t    \t\t  Data array will be collected only on an Enter key press.\n"
+            "\t -o PATH \t Path where to save captured data \n"
+            "\t -r \t\t Rate (captures per second) in which to collect data\n"
+            "\t    \t\t  in continous mode, defaults to 1 \n"
+            "\t -h \t\t Print this hint \n";
+printf("%s", str);
+}
+
 int main(int argc, char *argv[]) {
     int devno = 0;
     int input = 0;
@@ -17,9 +29,14 @@ int main(int argc, char *argv[]) {
         .rate = 1,
     };
 
-    while ((opt = getopt(argc, argv, "f:psr:h")) != -1) {
+    if (argc == 1) {
+        printhelp(argv[0]);
+        return 0;
+    }
+
+    while ((opt = getopt(argc, argv, "o:psr:h")) != -1) {
         switch (opt) {
-            case 'f':
+            case 'o':
                 cfg.file = fopen(optarg, "w");
                 if (!cfg.file) {
                     fprintf(stderr, "Erro with selected path %s\n", optarg);
@@ -30,14 +47,8 @@ int main(int argc, char *argv[]) {
             case 's': cfg.single_capture = true; break; // Save value only when key is pressed
             case 'r': cfg.rate = strtol(optarg, NULL, 10); break;
             case 'h': {
-                printf("%s [-f PATH, -s, -r, -p, -h]\n", argv[0]);
-                char *str = "\t -p \t\t Print captured values into stdout \n"
-                            "\t -s \t\t Use single capture mode instead of a continuous one. A data array will be collected only on a press of an Enter key \n"
-                            "\t -f PATH \t Path where to save captured data \n"
-                            "\t -r \t\t Rate (captures per second) in which to collect data in continous mode, defaults to 1 \n"
-                            "\t -r \t\t Print this hint \n";
-                printf("%s", str);
-                return 0;
+               printhelp(argv[0]);
+               return 0;
             }
             default:
                 fprintf(stderr, "Unrecognized argument -%c\n", opt);
@@ -79,7 +90,8 @@ int capture(struct hm_cfg *cfg) {
         if (interrupt_flag_set) {
             if (cfg->print)
                 printf("\n");
-            fprintf(cfg->file, "\n");
+            if (cfg->file)
+                fprintf(cfg->file, "\n");
             break;
         }
 

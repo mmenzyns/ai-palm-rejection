@@ -6,10 +6,10 @@ from imageio import imread
 import matplotlib.pyplot as plt
 from sys import argv
 import operator
-from scipy.ndimage.interpolation import rotate
 from tqdm import tqdm
-from pathlib import Path, PosixPath
-from argparse import ArgumentParser, Namespace
+
+from argparse import ArgumentParser
+from pathlib import Path
 
 
 def read_grayscale_pngs(path, width=20, height=13):
@@ -94,8 +94,8 @@ def weighted_average_indexes(image):
     return xpos, ypos
 
 
-def rotate_image(image, angle):
-    rotated = ndimage.rotate(image, angle, mode='nearest')
+def rotate_image(image, angle, mode='nearest'):
+    rotated = ndimage.rotate(image, angle, mode=mode)
 
     orig_average = weighted_average_indexes(image)
 
@@ -128,13 +128,10 @@ if __name__ == '__main__':
     ap.add_argument('-m', action='store_true', help="Use mirroring for generation", dest='mirror')
 
     args = ap.parse_args()
-    # args = Namespace(dest=PosixPath('out'), illegal=PosixPath('out/illegal/orig'), 
-    #         legal=PosixPath('out/legal/orig'), mirror=False, rotate=[-1.0, 1.0], shift=False)
-    print(args)
 
-    # if len(argv) == 1:
-    #     ap.print_help()
-    #     quit()
+    if len(argv) == 1:
+        ap.print_help()
+        quit()
 
     if not args.rotate and not args.shift and not args.mirror:
         print("No generation option provided. Choose all of them, rotation with -1 and 1 degrees? [y/N]")
@@ -145,7 +142,7 @@ if __name__ == '__main__':
                 quit()
             if valid[choice]:
                 args.rotate = [-1.0, 1.0]
-                args.shift = Truez
+                args.shift = True
                 args.mirror = True
                 break
 

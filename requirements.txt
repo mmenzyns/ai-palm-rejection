@@ -1,0 +1,95 @@
+Python 3.8
+
+Python modules:
+matplotlib
+seaborn
+sklearn
+scipy
+pandas
+numpy
+imageio
+tensorflow
+keras
+PIL
+imageio
+tkinter
+joblib
+
+Raw collection software uses modified kernel drivers and is laptop-specific. But theoretically it could work on laptops
+with a Synaptics touchpad.
+
+The modified driver that was used to develop this thesis is provided in touchpad_capture/5.9.0-rc5_rmi_core.ko.
+Which is possible to be run only on 5.9.0-rc5 kernel with Fedora configuration of the kernel.
+In order to compile the kernel drive. An rmi_core, usually located in kernel/drivers/input/rmi4 has to be recompilled with a 
+"CONFIG_RMI4_F54=y" flag.
+
+If the driver is compatible with the kernel, and touchpad_capture/load_rmi_core.sh has correct path in it, running this script 
+with sudo permissions should enable raw_data debug output.
+
+After this, for interaction with the touchpad through the driver. A touchpad_capture/capture program is provided. This 
+implements a V4L2 interface to capture the data stream provided by the driver. This program's interface can be printed 
+with a "-h" flag:
+
+./capture [-f PATH, -s, -r, -p, -h]
+	 -p 		 Print captured values into stdout 
+	 -s 		 Use single capture mode instead of a continuous one.
+	    		  Data array will be collected only on an Enter key press.
+	 -o PATH 	 Path where to save captured data 
+	 -r 		 Rate (captures per second) in which to collect data
+	    		  in continous mode, defaults to 1 
+	 -h 		 Print this hint 
+
+If saved to file. Data are saved in text format as numbers separated by a space character.
+
+To parse these data, a program data_processing/raw_dataprocessing.py is provided. This program saves images into a png format.
+It's interface is as follows:
+
+usage: raw_data_processing.py [-h] [--legal PATH] [--illegal PATH] [--nontouch PATH] [-W WIDTH] [-H HEIGHT] [dest]
+
+Read images created by touchpad capture program, and from illegal data, remove data that don't belong there, such as empty images, or some anomalies
+
+positional arguments:
+  dest             Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --legal PATH     dataset containing finger touches, that the palm ejection algorithm shouldn't reject
+  --illegal PATH   dataset containing palm touched, that the palm rejection algorithm should reject
+  --nontouch PATH  Remove data from illegal dataset which are similar to this dataset
+  -W WIDTH         width of each image
+  -H HEIGHT        height of each image
+
+Raw data files are located in touchpad_capture/raw_data.
+
+
+For data augmentation required for neural networks, a program data_processing/data_generation.py is provided. It's interface
+is as follows:
+
+usage: data_generation.py [-h] [--legal PATH] [--illegal PATH] [-r DEGREES [DEGREES ...]] [-s] [-m] [dest]
+
+Read data created by touchpad capture program, and from illegal data, remove data that don't belong there, such as empty images, or some anomalies
+
+positional arguments:
+  dest                  Destination folder, where to save the data. Inside this folder, another two folders "legal" and "illegal" if needed, are created. Default: "out".
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --legal PATH          dataset containing finger touches, that the palm ejection algorithm shouldn't reject
+  --illegal PATH        dataset containing palm touches, that the palm rejection algorithm should reject
+  -r DEGREES [DEGREES ...]
+                        don't use rotating for generation
+  -s                    Use shifting for generation
+  -m                    Use mirroring for generation
+
+
+After this, only machine learning models remain. These don't have interfaces and in order to provide different datasets to them,
+paths in code have to be changed.
+
+Lastly, for demonstration of the final model, a program ai-ml/real-time-demo.py is provided. This one again utilizes the
+modified driver, thus in order to work, requires compatible driver loaded using touchpad_capture/load_rmi_core.sh script.
+This real-time application utilizes serialized trained model ai-ml/RandomForest.joblib. This model is trained in program
+random_forest.py and serialized using joblib module.
+
+
+All .ipynb files are used for graph generation.
+
