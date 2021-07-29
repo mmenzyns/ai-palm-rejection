@@ -65,7 +65,7 @@ model.add(layers.Dense(1,  activation="sigmoid", name="output"))
 
 model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-dot_img_file = 'figures/cnn.pdf'
+dot_img_file = 'figures/cnn_layout.pdf'
 keras.utils.plot_model(model, to_file=dot_img_file, rankdir="LR")
 
 model.fit(X_train, Y_train, shuffle=True, batch_size=20, epochs=20, verbose=0, validation_split=0.1)

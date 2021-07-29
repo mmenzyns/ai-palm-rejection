@@ -15,8 +15,8 @@ imageio
 tkinter
 joblib
 
-Raw collection software uses modified kernel drivers and is laptop-specific. But theoretically it could work on laptops
-with a Synaptics touchpad.
+Raw collection software uses modified kernel drivers and is laptop-specific (developed on Lenovo ThinkPad T580. But 
+theoretically it could work on other laptops with a Synaptics touchpad.
 
 The modified driver that was used to develop this thesis is provided in touchpad_capture/5.9.0-rc5_rmi_core.ko.
 Which is possible to be run only on 5.9.0-rc5 kernel with Fedora configuration of the kernel.
